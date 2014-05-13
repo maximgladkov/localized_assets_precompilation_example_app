@@ -1,2 +1,7 @@
-<h1>Welcome#index</h1>
-<p>Find me in app/views/welcome/index.html.erb</p>
+<h1>Currently on <%= I18n.locale.upcase %> locale</h1>
+<h2>Please, select another one:</h2>
+<ul>
+  <% I18n.available_locales.each do |locale| -%>
+    <li><%= link_to locale.upcase, url_for(locale: locale) %></li>
+  <% end %>
+</ul>

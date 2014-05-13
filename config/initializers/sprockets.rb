@@ -1,9 +1,11 @@
 module Sprockets
+  LOCALIZABLE_ASSETS_REGEX = /\.(?:js|css)/
+
   module Helpers
     module RailsHelper
 
       # add locale to asset_prefix, if assets compiled
-      def asset_prefix
+      def asset_prefix_with_locale
         if Rails.env.development?
           Rails.application.config.assets.prefix
         else
@@ -15,19 +17,22 @@ module Sprockets
 
       # prevent asset from caching by adding timestamp
       def asset_path(source, options = {})
+        assert_prefix = asset_prefix_with_locale
         asset_path = asset_path_without_locale(source, options)
-        separator = asset_path =~ /\?/ ? '&' : '?'
-        
-        "#{ asset_path }#{ separator }t=#{ Time.now.to_i }"
+
+        if asset_path =~ LOCALIZABLE_ASSETS_REGEX
+          separator = asset_path =~ /\?/ ? '&' : '?'
+          "#{ asset_path }#{ separator }t=#{ Time.now.to_i }"
+        else
+          asset_path
+        end
       end
       
       alias_method :path_to_asset, :asset_path
 
     end
   end
-end
 
-module Sprockets
   class StaticCompiler
 
     alias_method :compile_without_manifest, :compile
@@ -48,13 +53,20 @@ module Sprockets
 
   end
 
-  class Manifest
+  class Asset
 
-    # add locale to assets' dir
-    def dir
-      Rails.env.development? ? @dir : "#{ @dir }/#{ I18n.locale }"
+    alias_method :digest_path_without_locale, :digest_path
+
+    # add locale for css and js files
+    def digest_path
+      digest_path = digest_path_without_locale
+      if digest_path =~ LOCALIZABLE_ASSETS_REGEX
+        "#{ I18n.locale }/#{ digest_path }"
+      else
+        digest_path
+      end
     end
-    
+
   end
 
   class Base

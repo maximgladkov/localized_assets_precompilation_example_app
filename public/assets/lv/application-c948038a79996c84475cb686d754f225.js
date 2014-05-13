@@ -1,0 +1,1 @@
+alert("LV: Sveiki, pasaule!");

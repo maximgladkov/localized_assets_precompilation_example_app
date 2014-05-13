@@ -1,1 +1,0 @@
-alert("LV: Sveiki, pasaule!");

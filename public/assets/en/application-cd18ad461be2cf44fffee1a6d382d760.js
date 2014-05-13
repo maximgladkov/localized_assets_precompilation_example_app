@@ -1,1 +1,0 @@
-alert("EN: Hello world!");
